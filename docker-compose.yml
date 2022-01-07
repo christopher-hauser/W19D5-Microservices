@@ -1,37 +1,35 @@
 version: '3.8'
 services:
-  app:
+  api:
     build: .
-    image: nodeapp
+    image: flaskapp
     ports:
-      - "80:8080"
+      - "5000:5000"
     environment:
-      DB_USERNAME: reading_list_app
-      DB_PASSWORD: password
-      DB_DATABASE: reading_list
-      DB_HOST: postgres
-      NODE_ENV: development
+      FLASK_APP: book_ratings.py
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://ratings_user:password@localhost/ratings
     volumes:
       - ".:/app"
     networks:
-      pgnodeapp:
+      pgflaskapp:
     depends_on:
       - "db"
-    command: ["./wait-for", "postgres:5432", "--", "npm", "run", "build-start"]
+    command: [ "./entrypoint.sh"]
   db:
     image: postgres:12-alpine
     environment:
-      POSTGRES_USER: reading_list_app
+      POSTGRES_USER: rating_user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: reading_list
+      POSTGRES_DB: rating
     volumes:
       - postgres-db:/var/lib/postgresql/data
     networks:
-      pgnodeapp:
+      pgflaskapp:
         aliases:
           - 'postgres'
 volumes:
   postgres-db:
 networks:
-  pgnodeapp:
+  pgflaskapp:
     driver: bridge
